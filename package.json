@@ -13,7 +13,8 @@
     "@emotion/styled": "^11.11.0",
     "@ethersproject/units": "^5.7.0",
     "@mui/icons-material": "^5.14.13",
-    "@mui/material": "^5.14.13",
+    "@mui/material": "^5.14.14",
+    "@mui/styled-engine-sc": "^6.0.0-alpha.2",
     "@web3-react/core": "^8.2.3",
     "@web3-react/metamask": "^8.2.4",
     "bufferutil": "^4.0.8",
@@ -22,6 +23,7 @@
     "next": "13.5.5",
     "react": "^18",
     "react-dom": "^18",
+    "styled-components": "^6.1.0",
     "utf-8-validate": "^5.0.10"
   },
   "devDependencies": {
