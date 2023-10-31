@@ -1,4 +1,11 @@
 "use client";
+import { useEffect, useState } from "react";
+import { initializeConnector } from "@web3-react/core";
+import { MetaMask } from "@web3-react/metamask";
+import { ContractRunner, ethers, parseUnits } from "ethers";
+import { formatEther, parseEther } from "@ethersproject/units";
+
+import MenuIcon from "@mui/icons-material/Menu";
 import {
   AppBar,
   Box,
@@ -8,13 +15,15 @@ import {
   Typography,
   Stack,
   Avatar,
+  FormControl,
+  InputLabel,
+  Input,
+  FormHelperText,
+  TextField,
+  Skeleton,
 } from "@mui/material";
-import { initializeConnector } from "@web3-react/core";
-import { MetaMask } from "@web3-react/metamask";
-import { ethers } from "ethers";
-import { formatEther, parseEther } from "@ethersproject/units";
-import { useEffect, useState } from "react";
-import MenuIcon from "@mui/icons-material/Menu";
+
+import abi from "./abi.json";
 
 const [metaMask, hooks] = initializeConnector(
   (action) => new MetaMask({ actions: action })
@@ -32,6 +41,11 @@ export default function Home() {
   const isActive = useIsActive();
   const provider = useProvider();
 
+  const [balance, setBalance] = useState("");
+  const [myAccount, setMyAccount] = useState("");
+  const [buyToken, setBuyToken] = useState("");
+  const [isLoading, setIsloading] = useState(false);
+
   // const[balance,]
   const [error, setError] = useState(undefined);
 
@@ -41,12 +55,60 @@ export default function Home() {
     });
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      // const providerEthers = new ethers.JsonRpcProvider();
+      const signer = provider?.getSigner();
+      const smartContract = new ethers.Contract(contractAddress, abi, signer);
+      // if (signer) {
+      // }
+      if (accounts != undefined) {
+        // const myBalance = await smartContract.
+        const myBalance = await smartContract.balanceOf(accounts[0]);
+        setMyAccount(accounts[0]);
+        setBalance(formatEther(myBalance));
+      }
+    })();
+  }, [accounts, isActive, provider]);
+
   const handleConnect = () => {
     metaMask.activate(contractChain);
   };
 
   const handleDisconnect = () => {
     metaMask.resetState();
+  };
+
+  const handleBuyToken = async () => {
+    if (parseInt(buyToken) < 0) {
+      return;
+    }
+    try {
+      setIsloading(true);
+      console.log(buyToken);
+
+      const signer = provider?.getSigner();
+      const smartContract = new ethers.Contract(contractAddress, abi, signer);
+      const valueConvertEther = parseUnits(buyToken.toString(), "ether");
+      // console.log({ valueConvertEther });
+
+      const tx = await smartContract.buy({
+        value: valueConvertEther,
+      });
+      smartContract.on("Transfer", (form, to, tokens) => {
+        // console.log({ form, to, tokens, tx });
+        const tokenFloat: number = parseFloat(formatEther(tokens));
+        const balanceFloat: number = parseFloat(balance);
+        const total = tokenFloat + balanceFloat;
+        setBalance(total.toString());
+        setBuyToken("");
+      });
+      console.log(tx.hash);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsloading(false);
+    }
   };
 
   return (
@@ -114,11 +176,71 @@ export default function Home() {
           </Toolbar>
         </AppBar>
       </Box>
-      <div>
-        <p>chainId: {chainId}</p>
-        <p>isActive: {isActive.toString()}</p>
-        <p>accounts: {accounts ? accounts : ""}</p>
-      </div>
+      <Box className="w-5/6 mx-auto mt-5">
+        {isActive == true ? (
+          <Stack
+            direction={"column"}
+            gap={3}
+            className="shadow-md p-2 rounded-md"
+          >
+            <Typography variant="h2">My wallet balance</Typography>
+            <TextField
+              id="Address"
+              label="Address"
+              variant="outlined"
+              size="small"
+              // value={contractAddress}
+              defaultValue={myAccount}
+              // onChange={(e) => {
+              //   setBuyToken((prev) => ({ ...prev, address: e.target.value }));
+              // }}
+            />
+            <TextField
+              id="KEMI TOKEN"
+              label="KEMI TOKEN"
+              variant="outlined"
+              size="small"
+              // defaultValue={balance}
+              value={balance}
+
+              // value={balance}
+            />
+            <Typography variant="h5">Buy KEMI Token</Typography>
+            <TextField
+              id="token"
+              label="token"
+              variant="outlined"
+              size="small"
+              type="number"
+              // defaultValue={balance}
+              // value={balance}
+              onChange={(e) => {
+                console.log(parseInt(e.target.value));
+
+                setBuyToken(e.target.value);
+              }}
+            />
+            {isLoading == false ? (
+              <Button
+                style={{
+                  backgroundColor: "lime",
+                }}
+                onClick={() => {
+                  handleBuyToken();
+                }}
+              >
+                ตกลง
+              </Button>
+            ) : (
+              <p>loading............</p>
+            )}
+          </Stack>
+        ) : (
+          <Typography variant="h2" textAlign={"center"}>
+            Not connect
+          </Typography>
+        )}
+      </Box>
     </>
   );
 }
