@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import { initializeConnector } from "@web3-react/core";
 import { MetaMask } from "@web3-react/metamask";
-import { ContractRunner, ethers, parseUnits } from "ethers";
-import { formatEther, parseEther } from "@ethersproject/units";
+import { ethers, parseUnits } from "ethers";
+import { formatEther } from "@ethersproject/units";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import {
@@ -14,13 +14,7 @@ import {
   Toolbar,
   Typography,
   Stack,
-  Avatar,
-  FormControl,
-  InputLabel,
-  Input,
-  FormHelperText,
   TextField,
-  Skeleton,
 } from "@mui/material";
 
 import abi from "./abi.json";
