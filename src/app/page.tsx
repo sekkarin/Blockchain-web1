@@ -52,10 +52,8 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       // const providerEthers = new ethers.JsonRpcProvider();
-      const signer = provider?.getSigner();
+      const signer:any = provider?.getSigner();
       const smartContract = new ethers.Contract(contractAddress, abi, signer);
-      // if (signer) {
-      // }
       if (accounts != undefined) {
         // const myBalance = await smartContract.
         const myBalance = await smartContract.balanceOf(accounts[0]);
@@ -81,7 +79,7 @@ export default function Home() {
       setIsloading(true);
       console.log(buyToken);
 
-      const signer = provider?.getSigner();
+      const signer:any = provider?.getSigner();
       const smartContract = new ethers.Contract(contractAddress, abi, signer);
       const valueConvertEther = parseUnits(buyToken.toString(), "ether");
       // console.log({ valueConvertEther });
